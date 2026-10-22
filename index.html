@@ -166,6 +166,12 @@ h2{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:24px;marg
 .done-mark{width:72px;height:72px;border-radius:50%;background:var(--ok-bg);color:var(--ok);display:grid;place-items:center;margin:40px 0 8px}
 .done-mark svg{width:36px;height:36px;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
 .center{padding-top:28vh;text-align:center}
+.ba-link{display:inline-flex;align-items:center;gap:6px;margin:-4px 0 12px 2px;padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:var(--card);font-weight:600;font-size:14px;color:var(--blue)}
+.ba-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:6px 0 4px}
+.ba-grid img{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:12px;background:var(--grey-bg);display:block}
+.ba-cell{position:relative}
+.ba-cell .x{position:absolute;top:6px;right:6px;width:30px;height:30px;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;font-size:16px;text-align:center;line-height:30px}
+.ba-h{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;margin:14px 0 2px}
 .thumb{width:56px;height:56px;border-radius:12px;object-fit:cover;background:var(--grey-bg);flex:0 0 auto}
 .row{display:flex;gap:12px;align-items:flex-start}
 
@@ -220,7 +226,7 @@ h2{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:24px;marg
 
 <script>
 // ====== SOZLAMA: Render'dagi bot serveringiz manzili (oxirida / belgisisiz) ======
-const API_BASE = "https://cosmetic-bot-79an.onrender.com";
+const API_BASE = "https://barber3-bot.onrender.com";
 // ================================================================================
 
 const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
@@ -244,7 +250,7 @@ const I18N = {
     theme: "Mavzu", sum: "so'm",
     loading: "Yuklanmoqda", wait: "Bir lahza…", waking: "Server uyg'onmoqda", waking_sub: "Birinchi ochilishda bir daqiqagacha kutish mumkin.",
     retry: "Qayta urinish", failed: "Ochilmadi", setup_title: "Sozlash kerak", setup_text: "index.html ichidagi API_BASE ga Render manzilini yozing.",
-    st_pending: "Tasdiq kutilmoqda", st_booked: "Tasdiqlangan", choose_barber: "Masterni tanlang", from_price: "dan {p}", choose_svc: "Xizmatni tanlang",
+    st_pending: "Tasdiq kutilmoqda", st_booked: "Tasdiqlangan", choose_barber: "Masterni tanlang", ba_btn: "Oldin / keyin rasmlari", ba_before: "Oldin", ba_after: "Keyin", from_price: "dan {p}", choose_svc: "Xizmatni tanlang",
     next: "Keyingisi", choose_date: "Sanani tanlang", choose_time: "Vaqtni tanlang", free_n: "{n} ta bo'sh", busy: "band", contact: "Aloqa", your_phone: "Telefon raqamingiz",
     phone_sub: "Master kerak bo'lganda siz bilan bog'lanadi", share_contact: "Kontakt bilan ulashish", book_btn: "Band qilish", barber: "Master", total: "Jami", svc_n: "{n} xizmat",
     pend_title: "Tasdiqlash kutilmoqda", pend_text: "Master tez orada yozuvingizni tasdiqlaydi", close: "Yopish", no_barbers: "Hozircha masterlar yo'q.",
@@ -257,7 +263,7 @@ const I18N = {
     err_server_error: "Server xatosi. Birozdan keyin urinib ko'ring.", err_network: "Server bilan aloqa yo'q.",
   },
   ru: {
-    st_pending: "Ожидает подтверждения", choose_barber: "Выберите мастера", from_price: "от {p}", choose_svc: "Выберите услуги",
+    st_pending: "Ожидает подтверждения", choose_barber: "Выберите мастера", ba_btn: "Фото до / после", ba_before: "До", ba_after: "После", from_price: "от {p}", choose_svc: "Выберите услуги",
     next: "Далее", choose_date: "Выберите дату", choose_time: "Выберите время", free_n: "{n} свободно", busy: "занято", contact: "Контакты", your_phone: "Ваш телефон",
     phone_sub: "Мастер свяжется с вами при необходимости", share_contact: "Поделиться контактом", book_btn: "Записаться", barber: "Мастер", total: "Итого", svc_n: "услуг: {n}",
     pend_title: "Ожидает подтверждения", pend_text: "Мастер скоро подтвердит вашу запись", close: "Закрыть", no_barbers: "Мастеров пока нет.",
@@ -307,7 +313,7 @@ const S = {
   sched: {date: "", branch: 0, barber: 0, list: null},
   report: {period: "day", branch: 0, barber: 0, from: "", to: "", data: null},
   set: {services: null, hours: null, hoursBranch: 0, admins: null, invite: null, rep: null},
-  modal: null,
+  modal: null, photos: [],
 };
 const nm = o => (o && ((S.lang === "ru" && o.name_ru) || o.name)) || "";
 const ad = o => (o && ((S.lang === "ru" && o.address_ru) || o.address)) || "";
@@ -317,10 +323,10 @@ const RU_UI = [["Masterni o'zgartirish", "Изменить мастера"], ["X
   ["O'zgartirish", "Изменить"], ["Yashirish", "Скрыть"], ["Ko'rsatish", "Показать"], ["Yashirin", "Скрыто"], [" daqiqa · ", " мин · "], ["Tasdiqlash", "Подтвердить"], ["Rad etish", "Отклонить"],
   ["Masterlar", "Мастера"], ["Tayyor", "Готово"], ["Nomi (ruscha)", "Название (рус.)"], ["Ismi (ruscha)", "Имя (рус.)"], ["Manzil (ruscha)", "Адрес (рус.)"], ["Nomi", "Название"], ["Ismi", "Имя"], ["Manzil (yozuv)", "Адрес (текст)"], ["Manzil", "Адрес"],
   ["Filial", "Филиал"], ["Rasm", "Фото"], ["Narxi (so'm)", "Цена (сум)"], ["Davomiyligi (daqiqa)", "Длительность (мин)"], ["Saqlandi", "Сохранено"], ["Avval filial qo'shing", "Сначала добавьте филиал"], ["Ism va filialni kiriting", "Введите имя и филиал"]];
-const RU_EXTRA = [["Filiallar", "Филиалы"], ["Rasmni o'qib bo'lmadi", "Не удалось прочитать фото"], ["Nomini kiriting", "Введите название"], ["Tayyorlanmoqda…", "Подготовка…"], ["Bu kunda yozilish yo'q.", "На этот день записей нет."], ["Bu davrda tushum yo'q", "За этот период выручки нет"], ["Tushum ·", "Выручка ·"], ["O'rtacha chek:", "Средний чек:"], ["Oldingi davr bilan (", "С прошлым периодом ("], ["Ikkala davrda ham tushum yo'q.", "В обоих периодах выручки нет."], ["Oldingi davrda tushum bo'lmagani uchun foiz hisoblanmaydi.", "Так как в прошлом периоде выручки не было, процент не рассчитывается."], ["Tushum dinamikasi", "Динамика выручки"], ["(oylar bo'yicha)", "(по месяцам)"], ["Kutilmoqda — hali bo'lmagan bronlar. Ular tushumga kirmaydi.", "Ожидают — записи, которые ещё не состоялись. Они не входят в выручку."], ["Kelgan mijozlar", "Пришло клиентов"], ["Qaytganlar ulushi", "Доля вернувшихся"], ["Yangi — salonda birinchi bajarilgan vizit shu davrda. Qaytgan — oldin ham bajarilgan vizit bo'lgan. Ma'lumot ilova ishga tushgandan beri hisoblanadi.", "Новые — первый выполненный визит в салоне пришёлся на этот период. Вернувшиеся — выполненные визиты были и раньше. Данные считаются с момента запуска приложения."], ["Eng ko'p kelganlar", "Чаще всего приходят"], ["Eng band kun", "Самый загруженный день"], ["Eng band oy", "Самый загруженный месяц"], ["Eng ko'p bekor", "Больше всего отмен"], ["Hali bajarilgan vizit yo'q.", "Выполненных визитов пока нет."], ["Foizlar faqat vaqti o'tgan va natijasi ma'lum bronlardan hisoblanadi", "Проценты считаются только по записям, время которых прошло и результат известен"], ["Fayl tanlangan davr, filial va master bo'yicha Telegramdagi shu bot chatiga yuboriladi. Aniq sanalar uchun yuqorida \"Oraliq\"ni tanlang.", "Файл за выбранный период, филиал и мастера будет отправлен в чат с этим ботом в Telegram. Для точных дат выберите выше «Период»."], ["Bu sozlama hali tayyor emas. Avval migration2.sql ni ishga tushiring.", "Эта настройка пока не готова. Сначала выполните migration2.sql."], ["Hisobot Telegramdagi shu bot chatiga yuboriladi.", "Отчёт отправляется в чат с этим ботом в Telegram."], ["Oxirgi yuborishda xato:", "Ошибка при последней отправке:"], ["Havolani masterga yuboring. U bir marta ishlaydi.", "Отправьте ссылку мастеру. Она работает один раз."], ["Havolani yangi adminga yuboring. U bir marta ishlaydi.", "Отправьте ссылку новому админу. Она работает один раз."], ["Google yoki Yandex xaritadagi to'liq havolani, yoki «41.311, 69.279» ko'rinishida koordinatani kiriting. Xaritada joyni uzoq bosib ushlasangiz, koordinata chiqadi. Qisqa havolalar (maps.app.goo.gl) ishlamaydi.", "Вставьте полную ссылку из Google или Яндекс Карт либо координаты в виде «41.311, 69.279». Если долго удерживать точку на карте, появятся координаты. Короткие ссылки (maps.app.goo.gl) не работают."], ["Boshlanish va tugash sanasini tanlang.", "Выберите дату начала и окончания."], ["Boshlanish sanasi tugash sanasidan keyin bo'lishi mumkin emas.", "Дата начала не может быть позже даты окончания."], ["Fayl Telegramga yuborildi ✅", "Файл отправлен в Telegram ✅"], ["Raqamni qo'lda kiriting", "Введите номер вручную"], ["Yozilishni bekor qilamizmi? Mijozga xabar boradi.", "Отменить запись? Клиент получит сообщение."], ["Yoqildi", "Включено"], ["O'chirildi", "Выключено"], ["Joylashuv qo'llab-quvvatlanmaydi", "Определение местоположения не поддерживается"], ["Joylashuvga ruxsat berilmadi. Koordinatani qo'lda kiriting.", "Нет доступа к местоположению. Введите координаты вручную."], ["Nom, narx va davomiylikni to'ldiring", "Заполните название, цену и длительность"], ["Nusxalandi", "Скопировано"], ["Havolani belgilab nusxalang", "Выделите ссылку и скопируйте её"], ["Masterning Telegramini uzamizmi? Unga xabar kelmaydi.", "Отключить Telegram мастера? Он перестанет получать уведомления."], ["Uzildi", "Отключено"], ["Lokatsiya tushunarsiz. Koordinata yoki to'liq xarita havolasini kiriting.", "Локация не распознана. Введите координаты или полную ссылку на карту."], ["Bu adminni o'chiramizmi?", "Удалить этого админа?"], ["Boshlanish vaqti tugashdan oldin bo'lishi kerak", "Время начала должно быть раньше времени окончания"], ["Master sifatida ulanish uchun havola", "Ссылка для подключения в качестве мастера"], ["Admin bo'lish uchun havola", "Ссылка для получения прав админа"], ["Barcha masterlar", "Все мастера"], ["Qosh laminatsiyasi", "Ламинирование бровей"], ["41.311, 69.279 yoki xarita havolasi", "41.311, 69.279 или ссылка на карту"], ["so'm", "сум"]];
+const RU_EXTRA = [["Rasm qo'shildi", "Фото добавлено"], ["Rasm o'chirildi", "Фото удалено"], ["Rasm yuklanmoqda…", "Загрузка фото…"], ["Bu rasmni o'chiramizmi?", "Удалить это фото?"], ["Rasm juda katta. Kichikroq rasm tanlang.", "Фото слишком большое. Выберите фото поменьше."], ["Har bir turdan 4 tagacha rasm. Rasm telefonda avtomatik siqiladi (eng uzun tomoni 1280 px), sifati saqlanadi.", "До 4 фото каждого вида. Фото автоматически сжимается на телефоне (до 1280 px по длинной стороне), качество сохраняется."], ["Hali rasm yo'q", "Фото пока нет"], ["Filiallar", "Филиалы"], ["Rasmni o'qib bo'lmadi", "Не удалось прочитать фото"], ["Nomini kiriting", "Введите название"], ["Tayyorlanmoqda…", "Подготовка…"], ["Bu kunda yozilish yo'q.", "На этот день записей нет."], ["Bu davrda tushum yo'q", "За этот период выручки нет"], ["Tushum ·", "Выручка ·"], ["O'rtacha chek:", "Средний чек:"], ["Oldingi davr bilan (", "С прошлым периодом ("], ["Ikkala davrda ham tushum yo'q.", "В обоих периодах выручки нет."], ["Oldingi davrda tushum bo'lmagani uchun foiz hisoblanmaydi.", "Так как в прошлом периоде выручки не было, процент не рассчитывается."], ["Tushum dinamikasi", "Динамика выручки"], ["(oylar bo'yicha)", "(по месяцам)"], ["Kutilmoqda — hali bo'lmagan bronlar. Ular tushumga kirmaydi.", "Ожидают — записи, которые ещё не состоялись. Они не входят в выручку."], ["Kelgan mijozlar", "Пришло клиентов"], ["Qaytganlar ulushi", "Доля вернувшихся"], ["Yangi — salonda birinchi bajarilgan vizit shu davrda. Qaytgan — oldin ham bajarilgan vizit bo'lgan. Ma'lumot ilova ishga tushgandan beri hisoblanadi.", "Новые — первый выполненный визит в салоне пришёлся на этот период. Вернувшиеся — выполненные визиты были и раньше. Данные считаются с момента запуска приложения."], ["Eng ko'p kelganlar", "Чаще всего приходят"], ["Eng band kun", "Самый загруженный день"], ["Eng band oy", "Самый загруженный месяц"], ["Eng ko'p bekor", "Больше всего отмен"], ["Hali bajarilgan vizit yo'q.", "Выполненных визитов пока нет."], ["Foizlar faqat vaqti o'tgan va natijasi ma'lum bronlardan hisoblanadi", "Проценты считаются только по записям, время которых прошло и результат известен"], ["Fayl tanlangan davr, filial va master bo'yicha Telegramdagi shu bot chatiga yuboriladi. Aniq sanalar uchun yuqorida \"Oraliq\"ni tanlang.", "Файл за выбранный период, филиал и мастера будет отправлен в чат с этим ботом в Telegram. Для точных дат выберите выше «Период»."], ["Bu sozlama hali tayyor emas. Avval migration2.sql ni ishga tushiring.", "Эта настройка пока не готова. Сначала выполните migration2.sql."], ["Hisobot Telegramdagi shu bot chatiga yuboriladi.", "Отчёт отправляется в чат с этим ботом в Telegram."], ["Oxirgi yuborishda xato:", "Ошибка при последней отправке:"], ["Havolani masterga yuboring. U bir marta ishlaydi.", "Отправьте ссылку мастеру. Она работает один раз."], ["Havolani yangi adminga yuboring. U bir marta ishlaydi.", "Отправьте ссылку новому админу. Она работает один раз."], ["Google yoki Yandex xaritadagi to'liq havolani, yoki «41.311, 69.279» ko'rinishida koordinatani kiriting. Xaritada joyni uzoq bosib ushlasangiz, koordinata chiqadi. Qisqa havolalar (maps.app.goo.gl) ishlamaydi.", "Вставьте полную ссылку из Google или Яндекс Карт либо координаты в виде «41.311, 69.279». Если долго удерживать точку на карте, появятся координаты. Короткие ссылки (maps.app.goo.gl) не работают."], ["Boshlanish va tugash sanasini tanlang.", "Выберите дату начала и окончания."], ["Boshlanish sanasi tugash sanasidan keyin bo'lishi mumkin emas.", "Дата начала не может быть позже даты окончания."], ["Fayl Telegramga yuborildi ✅", "Файл отправлен в Telegram ✅"], ["Raqamni qo'lda kiriting", "Введите номер вручную"], ["Yozilishni bekor qilamizmi? Mijozga xabar boradi.", "Отменить запись? Клиент получит сообщение."], ["Yoqildi", "Включено"], ["O'chirildi", "Выключено"], ["Joylashuv qo'llab-quvvatlanmaydi", "Определение местоположения не поддерживается"], ["Joylashuvga ruxsat berilmadi. Koordinatani qo'lda kiriting.", "Нет доступа к местоположению. Введите координаты вручную."], ["Nom, narx va davomiylikni to'ldiring", "Заполните название, цену и длительность"], ["Nusxalandi", "Скопировано"], ["Havolani belgilab nusxalang", "Выделите ссылку и скопируйте её"], ["Masterning Telegramini uzamizmi? Unga xabar kelmaydi.", "Отключить Telegram мастера? Он перестанет получать уведомления."], ["Uzildi", "Отключено"], ["Lokatsiya tushunarsiz. Koordinata yoki to'liq xarita havolasini kiriting.", "Локация не распознана. Введите координаты или полную ссылку на карту."], ["Bu adminni o'chiramizmi?", "Удалить этого админа?"], ["Boshlanish vaqti tugashdan oldin bo'lishi kerak", "Время начала должно быть раньше времени окончания"], ["Master sifatida ulanish uchun havola", "Ссылка для подключения в качестве мастера"], ["Admin bo'lish uchun havola", "Ссылка для получения прав админа"], ["Barcha masterlar", "Все мастера"], ["Qosh laminatsiyasi", "Ламинирование бровей"], ["41.311, 69.279 yoki xarita havolasi", "41.311, 69.279 или ссылка на карту"], ["so'm", "сум"]];
 RU_UI.push(...RU_EXTRA);
 RU_UI.sort((a, b) => b[0].length - a[0].length);
-const RU_EXACT = {"Jadval": "Расписание", "Hisobot": "Отчёт", "Sozlamalar": "Настройки", "Bugun": "Сегодня", "Hafta": "Неделя", "Oy": "Месяц", "Oraliq": "Период", "Mijoz": "Клиент", "Yangi": "Новые", "Qaytgan": "Вернувшиеся", "Admin": "Админ", "Bajarildi": "Выполнено", "Kelmadi": "Не пришёл", "Kutilmoqda": "Ожидает", "Bekor qilingan": "Отменено", "Bajarilgan": "Выполнено", "Kelmagan": "Не пришли", "Uzish": "Отключить", "Logo": "Логотип", "Dan": "С", "Gacha": "По", "Farq": "Разница", "Saqlash": "Сохранить", "Bekor qilish": "Отменить", "Nusxalash": "Копировать", "O'chirish": "Удалить", "Lokatsiya": "Локация", "Qayta ulash": "Подключить заново", "Telegramga ulash": "Подключить Telegram", "Ish vaqti": "Рабочее время", "Adminlar": "Админы", "Mijozlar": "Клиенты", "Yuklab olish": "Скачать", "O'zgarish": "Изменение", "Oldingi davr": "Прошлый период", "Hozirgi joylashuvim": "Моё местоположение", "Yoqilgan ✅": "Включено ✅", "O'chirilgan": "Выключено", "Telegram orqali yuborish": "Отправить через Telegram", "Excel yuklab olish": "Скачать Excel", "PDF yuklab olish": "Скачать PDF", "Dam olish kuni": "Выходной", "Salon ma'lumotlari": "Данные салона", "Bog'lanish raqami": "Контактный номер", "Tavsif (o'zbekcha)": "Описание (узб.)", "Tavsif (ruscha)": "Описание (рус.)", "Ko'p so'ralgan xizmatlar": "Популярные услуги", "Bronlar natijasi": "Итоги записей", "Mening ma'lumotlarim": "Мои данные", "Avtomatik hisobotlar": "Автоматические отчёты", "Haftalik hisobot": "Еженедельный отчёт", "Oylik hisobot": "Ежемесячный отчёт", "Har dushanba 09:00 (o'tgan hafta)": "Каждый понедельник в 09:00 (за прошлую неделю)", "Har oyning 1-kuni 09:00 (o'tgan oy)": "1-го числа каждого месяца в 09:00 (за прошлый месяц)", "+ Admin qo'shish havolasi": "+ Ссылка для добавления админа", "Hozircha qo'shimcha admin yo'q.": "Дополнительных админов пока нет.", "Telefon kiritilmagan": "Телефон не указан", "Lokatsiya bor": "Локация указана", "Lokatsiya yo'q": "Локация не указана", "📲 Telegram ulangan ✅": "📲 Telegram подключён ✅", "📲 Telegram ulanmagan (xabar faqat egasiga boradi)": "📲 Telegram не подключён (уведомления получает только владелец)", "Dushanba": "Понедельник", "Seshanba": "Вторник", "Chorshanba": "Среда", "Payshanba": "Четверг", "Juma": "Пятница", "Shanba": "Суббота", "Yakshanba": "Воскресенье"};
+const RU_EXACT = {"📷 Rasmlar": "📷 Фото", "Rasmlar": "Фото", "Oldin": "До", "Keyin": "После", "Jadval": "Расписание", "Hisobot": "Отчёт", "Sozlamalar": "Настройки", "Bugun": "Сегодня", "Hafta": "Неделя", "Oy": "Месяц", "Oraliq": "Период", "Mijoz": "Клиент", "Yangi": "Новые", "Qaytgan": "Вернувшиеся", "Admin": "Админ", "Bajarildi": "Выполнено", "Kelmadi": "Не пришёл", "Kutilmoqda": "Ожидает", "Bekor qilingan": "Отменено", "Bajarilgan": "Выполнено", "Kelmagan": "Не пришли", "Uzish": "Отключить", "Logo": "Логотип", "Dan": "С", "Gacha": "По", "Farq": "Разница", "Saqlash": "Сохранить", "Bekor qilish": "Отменить", "Nusxalash": "Копировать", "O'chirish": "Удалить", "Lokatsiya": "Локация", "Qayta ulash": "Подключить заново", "Telegramga ulash": "Подключить Telegram", "Ish vaqti": "Рабочее время", "Adminlar": "Админы", "Mijozlar": "Клиенты", "Yuklab olish": "Скачать", "O'zgarish": "Изменение", "Oldingi davr": "Прошлый период", "Hozirgi joylashuvim": "Моё местоположение", "Yoqilgan ✅": "Включено ✅", "O'chirilgan": "Выключено", "Telegram orqali yuborish": "Отправить через Telegram", "Excel yuklab olish": "Скачать Excel", "PDF yuklab olish": "Скачать PDF", "Dam olish kuni": "Выходной", "Salon ma'lumotlari": "Данные салона", "Bog'lanish raqami": "Контактный номер", "Tavsif (o'zbekcha)": "Описание (узб.)", "Tavsif (ruscha)": "Описание (рус.)", "Ko'p so'ralgan xizmatlar": "Популярные услуги", "Bronlar natijasi": "Итоги записей", "Mening ma'lumotlarim": "Мои данные", "Avtomatik hisobotlar": "Автоматические отчёты", "Haftalik hisobot": "Еженедельный отчёт", "Oylik hisobot": "Ежемесячный отчёт", "Har dushanba 09:00 (o'tgan hafta)": "Каждый понедельник в 09:00 (за прошлую неделю)", "Har oyning 1-kuni 09:00 (o'tgan oy)": "1-го числа каждого месяца в 09:00 (за прошлый месяц)", "+ Admin qo'shish havolasi": "+ Ссылка для добавления админа", "Hozircha qo'shimcha admin yo'q.": "Дополнительных админов пока нет.", "Telefon kiritilmagan": "Телефон не указан", "Lokatsiya bor": "Локация указана", "Lokatsiya yo'q": "Локация не указана", "📲 Telegram ulangan ✅": "📲 Telegram подключён ✅", "📲 Telegram ulanmagan (xabar faqat egasiga boradi)": "📲 Telegram не подключён (уведомления получает только владелец)", "Dushanba": "Понедельник", "Seshanba": "Вторник", "Chorshanba": "Среда", "Payshanba": "Четверг", "Juma": "Пятница", "Shanba": "Суббота", "Yakshanba": "Воскресенье"};
 const RU_RX = [[/(\d+) ta · /g, "$1 виз. · "], [/(\d+) ta\b/g, "$1 шт."]];
 const ruMsg = m => {
   if (S.lang !== "ru") return m;
@@ -365,6 +371,31 @@ const money = n => Number(n).toLocaleString("ru-RU") + " " + t("sum");
 const loading = () => '<div class="skel" role="status" aria-label="' + t("loading") + '"><i></i><i></i><i></i></div>';
 const hasGeo = o => o && o.lat != null && o.lng != null;
 const imgSrc = u => (u ? API_BASE + u : "");
+const photosOf = sid => (S.photos || []).filter(p => p.service_id === sid);
+
+// Rasmni telefonda siqish: eng uzun tomoni maxSide px, JPEG. Katta bo'lsa sifatni pasaytirib qayta urinadi.
+function fileToJpeg(file, maxSide) {
+  return new Promise((res, rej) => {
+    const img = new Image(), url = URL.createObjectURL(file);
+    img.onload = () => {
+      const sc = Math.min(1, maxSide / Math.max(img.width, img.height));
+      const c = document.createElement("canvas");
+      c.width = Math.round(img.width * sc); c.height = Math.round(img.height * sc);
+      const ctx = c.getContext("2d");
+      ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, c.width, c.height);
+      ctx.imageSmoothingQuality = "high";
+      ctx.drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url);
+      for (const q of [0.86, 0.78, 0.7, 0.6]) {
+        const d = c.toDataURL("image/jpeg", q);
+        if (d.length < 1900000) { res(d); return; }
+      }
+      rej(new Error("Rasm juda katta. Kichikroq rasm tanlang."));
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); rej(new Error("Rasmni o'qib bo'lmadi")); };
+    img.src = url;
+  });
+}
 
 S.date = ymd(0); S.sched.date = ymd(0); S.barbers = [];
 
@@ -564,7 +595,8 @@ function viewServices() {
   const L = (S.services || []).filter(x => x.barber_id === S.barber.id);
   return subHd(nm(S.barber)) + "<h2 style='margin-top:6px'>" + t("choose_svc") + "</h2>" + L.map(s =>
     '<button class="svc' + (S.picked.includes(s.id) ? " on" : "") + '" data-a="toggle-svc" data-id="' + s.id + '"><span><b>' + esc(nm(s)) +
-    "</b><small>" + t("minutes", {n: s.duration_min}) + "</small></span><em>" + money(s.price) + "</em></button>").join("");
+    "</b><small>" + t("minutes", {n: s.duration_min}) + "</small></span><em>" + money(s.price) + "</em></button>" +
+    (photosOf(s.id).length ? '<button class="ba-link" data-a="svc-photos" data-id="' + s.id + '">📷 ' + t("ba_btn") + "</button>" : "")).join("");
 }
 
 function viewCalendar() {
@@ -826,7 +858,8 @@ function viewSettings() {
           '<div class="btns"><button class="small-btn" data-a="copy-binv">Nusxalash</button><button class="small-btn" data-a="share-binv">Telegram orqali yuborish</button></div></div>' : "") +
         sv.map(x => '<div class="list-row"><span>' + esc(nm(x)) + (x.active ? "" : ' <span class="tag">Yashirin</span>') + '<div class="muted">' + x.duration_min + " daqiqa · " + Number(x.price).toLocaleString("ru-RU") + sumUz + "</div></span>" +
           '<span class="btns" style="margin:0"><button class="small-btn" data-a="edit-service" data-id="' + x.id + '">O\'zgartirish</button>' +
-          '<button class="small-btn" data-a="toggle-service" data-id="' + x.id + '">' + (x.active ? "Yashirish" : "Ko'rsatish") + "</button></span></div>").join("") +
+          '<button class="small-btn" data-a="toggle-service" data-id="' + x.id + '">' + (x.active ? "Yashirish" : "Ko'rsatish") + "</button>" +
+          '<button class="small-btn" data-a="svc-photos-admin" data-id="' + x.id + '">📷 Rasmlar' + (photosOf(x.id).length ? " (" + photosOf(x.id).length + ")" : "") + "</button></span></div>").join("") +
         '<button class="ghost" style="width:100%;margin-top:10px" data-a="add-service" data-b="' + b.id + '">+ Xizmat qo\'shish</button></div>';
     }).join("");
     if (isFull()) h += '<button class="ghost" style="width:100%" data-a="add-barber">+ Master qo\'shish</button>';
@@ -897,6 +930,24 @@ function modalHtml() {
     '<img class="prev" id="f-prev" alt="" ' + (url ? 'src="' + esc(imgSrc(url)) + '"' : 'style="display:none"') + '>' +
     '<input id="f-file" type="file" accept="image/*" data-file="' + id + '">';
 
+  if (m.type === "photos") {
+    const sv = (S.services || []).find(x => x.id === m.sid), ph = photosOf(m.sid);
+    const grp = k => { const L = ph.filter(p => p.kind === k); return L.length ? '<div class="ba-h">' + t(k === "before" ? "ba_before" : "ba_after") + '</div><div class="ba-grid">' + L.map(p => '<img loading="lazy" alt="" src="' + esc(p.url) + '">').join("") + "</div>" : ""; };
+    return '<div class="sheet"><div><h2 style="margin-top:0">' + esc(nm(sv)) + "</h2>" + grp("before") + grp("after") +
+      '<div class="btns" style="margin-top:18px"><button class="primary" data-a="close-modal">' + t("close") + "</button></div></div></div>";
+  }
+  if (m.type === "svcphotos") {
+    const sv = (S.set.services || []).find(x => x.id === m.sid), ph = photosOf(m.sid);
+    const grp = (k, label) => {
+      const L = ph.filter(p => p.kind === k);
+      return "<label>" + label + '</label><div class="ba-grid">' + L.map(p => '<div class="ba-cell"><img loading="lazy" alt="" src="' + esc(p.url) + '"><button class="x" data-a="del-photo" data-id="' + p.id + '">✕</button></div>').join("") + "</div>" +
+        (L.length < 4 ? '<input type="file" accept="image/*" data-sphoto="' + k + '"' + (m.busy ? " disabled" : "") + ">" : "");
+    };
+    return '<div class="sheet"><div><h2 style="margin-top:0">Rasmlar</h2><div class="muted">' + esc(nm(sv)) + "</div>" + grp("before", "Oldin") + grp("after", "Keyin") +
+      '<div class="hint">Har bir turdan 4 tagacha rasm. Rasm telefonda avtomatik siqiladi (eng uzun tomoni 1280 px), sifati saqlanadi.</div>' +
+      (m.busy ? '<div class="hint">Rasm yuklanmoqda…</div>' : "") +
+      '<div class="btns" style="margin-top:18px"><button class="primary" data-a="close-modal">Tayyor</button></div></div></div>';
+  }
   if (m.type === "service") {
     return '<div class="sheet"><div><h2 style="margin-top:0">' + (m.data ? "Xizmatni o'zgartirish" : "Yangi xizmat") + "</h2>" +
       '<label for="f-name">Nomi</label><input id="f-name" type="text" value="' + esc(d.name || "") + '" placeholder="Qosh laminatsiyasi">' +
@@ -1086,7 +1137,7 @@ function applyTheme() {
   document.documentElement.lang = S.lang;
   try { const c = S.theme === "dark" ? "#16191F" : "#F4F6F8"; tg.setHeaderColor(c); tg.setBackgroundColor(c); } catch (e) {}
 }
-const refreshPublic = () => api("/api/bootstrap").then(b => { S.services = b.services; S.barbers = b.barbers; S.branches = b.branches; }).catch(() => {});
+const refreshPublic = () => api("/api/bootstrap").then(b => { S.services = b.services; S.barbers = b.barbers; S.branches = b.branches; S.photos = b.service_photos || []; }).catch(() => {});
 
 // ---------- actions
 const H = {
@@ -1181,6 +1232,16 @@ const H = {
       {enableHighAccuracy: true, timeout: 10000});
   },
 
+  "svc-photos": d => { S.modal = {type: "photos", sid: Number(d.id)}; render(); },
+  "svc-photos-admin": d => { S.modal = {type: "svcphotos", sid: Number(d.id), busy: false}; render(); },
+  "del-photo": async d => {
+    if (!(await ask("Bu rasmni o'chiramizmi?"))) return;
+    try {
+      await api("/api/admin/service-photos/" + Number(d.id), {method: "DELETE"});
+      S.photos = S.photos.filter(p => p.id !== Number(d.id));
+      toast("Rasm o'chirildi"); render();
+    } catch (e) { toast(errText(e), true); }
+  },
   "add-service": d => { S.modal = {type: "service", data: null, barberId: Number(d.b)}; render(); },
   "edit-service": d => { S.modal = {type: "service", data: S.set.services.find(s => s.id === Number(d.id))}; render(); },
   "save-service": async () => {
@@ -1336,6 +1397,18 @@ document.addEventListener("input", e => {
 });
 document.addEventListener("change", async e => {
   const el = e.target;
+  if (el.dataset.sphoto) {
+    const f = el.files && el.files[0], kind = el.dataset.sphoto, m = S.modal;
+    if (!f || !m || m.type !== "svcphotos" || m.busy) return;
+    m.busy = true; render();
+    try {
+      const data = await fileToJpeg(f, 1280);
+      const p = await api("/api/admin/services/" + m.sid + "/photos", {method: "POST", body: {kind, data}});
+      S.photos.push(p); toast("Rasm qo'shildi");
+    } catch (err) { toast(errText(err), true); }
+    m.busy = false; if (S.modal === m) render();
+    return;
+  }
   if (el.dataset.file) {
     const f = el.files && el.files[0];
     if (!f || !S.modal) return;
@@ -1377,7 +1450,7 @@ async function boot() {
   const slow = setTimeout(() => screen(t("waking"), t("waking_sub"), false), 5000);
   try {
     const b = await api("/api/bootstrap");
-    S.me = b.me; S.shop = b.shop; S.branches = b.branches; S.services = b.services; S.barbers = b.barbers || [];
+    S.me = b.me; S.shop = b.shop; S.branches = b.branches; S.services = b.services; S.barbers = b.barbers || []; S.photos = b.service_photos || [];
     S.lang = b.me.lang || S.lang; store("lang", S.lang);
     if (isStaff()) S.adminBranches = await api("/api/admin/branches");
     if (isFull()) { try { S.adminBarbers = await api("/api/admin/barbers"); } catch (e2) { S.adminBarbers = []; } }
