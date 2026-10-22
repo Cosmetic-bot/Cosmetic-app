@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
-<title>Barbershop</title>
+<title>Beauty Salon</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap&subset=latin,latin-ext,cyrillic" rel="stylesheet">
@@ -220,7 +220,7 @@ h2{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:24px;marg
 
 <script>
 // ====== SOZLAMA: Render'dagi bot serveringiz manzili (oxirida / belgisisiz) ======
-const API_BASE = "https://cosmetic-bot-79an.onrender.com";
+const API_BASE = "https://barber3-bot.onrender.com";
 // ================================================================================
 
 const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
@@ -246,8 +246,8 @@ const I18N = {
     retry: "Qayta urinish", failed: "Ochilmadi", setup_title: "Sozlash kerak", setup_text: "index.html ichidagi API_BASE ga Render manzilini yozing.",
     st_pending: "Tasdiq kutilmoqda", st_booked: "Tasdiqlangan", choose_barber: "Barberni tanlang", from_price: "dan {p}", choose_svc: "Xizmatni tanlang",
     next: "Keyingisi", choose_date: "Sanani tanlang", choose_time: "Vaqtni tanlang", free_n: "{n} ta bo'sh", busy: "band", contact: "Aloqa", your_phone: "Telefon raqamingiz",
-    phone_sub: "Usta kerak bo'lganda siz bilan bog'lanadi", share_contact: "Kontakt bilan ulashish", book_btn: "Band qilish", barber: "Usta", total: "Jami", svc_n: "{n} xizmat",
-    pend_title: "Tasdiqlash kutilmoqda", pend_text: "Usta tez orada yozuvingizni tasdiqlaydi", close: "Yopish", no_barbers: "Hozircha ustalar yo'q.",
+    phone_sub: "Master kerak bo'lganda siz bilan bog'lanadi", share_contact: "Kontakt bilan ulashish", book_btn: "Band qilish", barber: "Master", total: "Jami", svc_n: "{n} xizmat",
+    pend_title: "Tasdiqlash kutilmoqda", pend_text: "Master tez orada yozuvingizni tasdiqlaydi", close: "Yopish", no_barbers: "Hozircha masterlar yo'q.",
     st_booked_old: "Kutilmoqda", st_done: "Bajarildi", st_no_show: "Kelmadi", st_cancelled: "Bekor qilingan", st_past: "O'tgan",
     err_auth_required: "Ilovani Telegram orqali oching.", err_auth_invalid: "Kirishda xatolik. Ilovani qayta oching.",
     err_auth_expired: "Sessiya eskirgan. Ilovani qayta oching.", err_slot_unavailable: "Bu vaqt band yoki mavjud emas.",
@@ -312,10 +312,10 @@ const S = {
 const nm = o => (o && ((S.lang === "ru" && o.name_ru) || o.name)) || "";
 const ad = o => (o && ((S.lang === "ru" && o.address_ru) || o.address)) || "";
 const svcN = b => ((S.lang === "ru" && b.svc_names_ru) || b.svc_names || "");
-const RU_UI = [["Ustani o'zgartirish", "Изменить мастера"], ["Xizmatni o'zgartirish", "Изменить услугу"], ["Filialni o'zgartirish", "Изменить филиал"], ["Yangi usta", "Новый мастер"], ["Yangi xizmat", "Новая услуга"], ["Yangi filial", "Новый филиал"],
-  ["+ Xizmat qo'shish", "+ Добавить услугу"], ["+ Usta qo'shish", "+ Добавить мастера"], ["Dam olish kunlari", "Выходные дни"], ["Kunni bosing: dam olish kuni belgilanadi yoki olib tashlanadi.", "Нажмите на день, чтобы отметить или снять выходной."],
+const RU_UI = [["Masterni o'zgartirish", "Изменить мастера"], ["Xizmatni o'zgartirish", "Изменить услугу"], ["Filialni o'zgartirish", "Изменить филиал"], ["Yangi master", "Новый мастер"], ["Yangi xizmat", "Новая услуга"], ["Yangi filial", "Новый филиал"],
+  ["+ Xizmat qo'shish", "+ Добавить услугу"], ["+ Master qo'shish", "+ Добавить мастера"], ["Dam olish kunlari", "Выходные дни"], ["Kunni bosing: dam olish kuni belgilanadi yoki olib tashlanadi.", "Нажмите на день, чтобы отметить или снять выходной."],
   ["O'zgartirish", "Изменить"], ["Yashirish", "Скрыть"], ["Ko'rsatish", "Показать"], ["Yashirin", "Скрыто"], [" daqiqa · ", " мин · "], ["Tasdiqlash", "Подтвердить"], ["Rad etish", "Отклонить"],
-  ["Ustalar", "Мастера"], ["Tayyor", "Готово"], ["Nomi (ruscha)", "Название (рус.)"], ["Ismi (ruscha)", "Имя (рус.)"], ["Manzil (ruscha)", "Адрес (рус.)"], ["Nomi", "Название"], ["Ismi", "Имя"], ["Manzil (yozuv)", "Адрес (текст)"], ["Manzil", "Адрес"],
+  ["Masterlar", "Мастера"], ["Tayyor", "Готово"], ["Nomi (ruscha)", "Название (рус.)"], ["Ismi (ruscha)", "Имя (рус.)"], ["Manzil (ruscha)", "Адрес (рус.)"], ["Nomi", "Название"], ["Ismi", "Имя"], ["Manzil (yozuv)", "Адрес (текст)"], ["Manzil", "Адрес"],
   ["Filial", "Филиал"], ["Rasm", "Фото"], ["Narxi (so'm)", "Цена (сум)"], ["Davomiyligi (daqiqa)", "Длительность (мин)"], ["Saqlandi", "Сохранено"], ["Avval filial qo'shing", "Сначала добавьте филиал"], ["Ism va filialni kiriting", "Введите имя и филиал"]];
 const ruMsg = m => { if (S.lang !== "ru") return m; RU_UI.forEach(([a, b]) => { m = String(m).split(a).join(b); }); return m; };
 function ruTree(root) {
@@ -500,7 +500,7 @@ function barberPills(sel, action, branchId) {
   if (!isFull()) return "";
   const list = (S.adminBarbers || []).filter(b => !branchId || b.branch_id === branchId);
   if (list.length < 2) return "";
-  let h = '<div class="pills"><button class="pill' + (sel === 0 ? " on" : "") + '" data-a="' + action + '" data-id="0">Barcha ustalar</button>';
+  let h = '<div class="pills"><button class="pill' + (sel === 0 ? " on" : "") + '" data-a="' + action + '" data-id="0">Barcha masterlar</button>';
   list.forEach(b => { h += '<button class="pill' + (sel === b.id ? " on" : "") + '" data-a="' + action + '" data-id="' + b.id + '">' + esc(nm(b)) + "</button>"; });
   return h + "</div>";
 }
@@ -758,7 +758,7 @@ function viewReport() {
     h += "<h2>Yuklab olish</h2>" +
       '<div class="card"><div class="btns"><button class="small-btn" data-a="export-xlsx">Excel yuklab olish</button>' +
       '<button class="small-btn" data-a="export-pdf">PDF yuklab olish</button></div>' +
-      '<div class="note" style="margin:8px 0 0">Fayl tanlangan davr, filial va usta bo\'yicha Telegramdagi shu bot chatiga yuboriladi. Aniq sanalar uchun yuqorida "Oraliq"ni tanlang.</div></div>';
+      '<div class="note" style="margin:8px 0 0">Fayl tanlangan davr, filial va master bo\'yicha Telegramdagi shu bot chatiga yuboriladi. Aniq sanalar uchun yuqorida "Oraliq"ni tanlang.</div></div>';
   return h;
 }
 
@@ -791,7 +791,7 @@ function viewSettings() {
 
   }
 
-  h += isFull() ? "<h2>Ustalar</h2>" : "<h2>Mening ma'lumotlarim</h2>";
+  h += isFull() ? "<h2>Masterlar</h2>" : "<h2>Mening ma'lumotlarim</h2>";
   if (S.adminBarbers === null || T.services === null) h += loading();
   else {
     h += S.adminBarbers.map(b => {
@@ -805,14 +805,14 @@ function viewSettings() {
         '<button class="small-btn" data-a="off-days" data-id="' + b.id + '">Dam olish kunlari</button>' +
         (isFull() ? '<button class="small-btn" data-a="link-barber" data-id="' + b.id + '">' + (b.linked ? "Qayta ulash" : "Telegramga ulash") + "</button>" : "") +
         (isFull() && b.linked ? '<button class="small-btn no" data-a="unlink-barber" data-id="' + b.id + '">Uzish</button>' : "") + "</div>" +
-        (T.binv && T.binv.id === b.id ? '<div class="linkbox-wrap"><div class="muted">Havolani ustaga yuboring. U bir marta ishlaydi.</div><div class="linkbox">' + esc(T.binv.link) + "</div>" +
+        (T.binv && T.binv.id === b.id ? '<div class="linkbox-wrap"><div class="muted">Havolani masterga yuboring. U bir marta ishlaydi.</div><div class="linkbox">' + esc(T.binv.link) + "</div>" +
           '<div class="btns"><button class="small-btn" data-a="copy-binv">Nusxalash</button><button class="small-btn" data-a="share-binv">Telegram orqali yuborish</button></div></div>' : "") +
         sv.map(x => '<div class="list-row"><span>' + esc(nm(x)) + (x.active ? "" : ' <span class="tag">Yashirin</span>') + '<div class="muted">' + x.duration_min + " daqiqa · " + Number(x.price).toLocaleString("ru-RU") + sumUz + "</div></span>" +
           '<span class="btns" style="margin:0"><button class="small-btn" data-a="edit-service" data-id="' + x.id + '">O\'zgartirish</button>' +
           '<button class="small-btn" data-a="toggle-service" data-id="' + x.id + '">' + (x.active ? "Yashirish" : "Ko'rsatish") + "</button></span></div>").join("") +
         '<button class="ghost" style="width:100%;margin-top:10px" data-a="add-service" data-b="' + b.id + '">+ Xizmat qo\'shish</button></div>';
     }).join("");
-    if (isFull()) h += '<button class="ghost" style="width:100%" data-a="add-barber">+ Usta qo\'shish</button>';
+    if (isFull()) h += '<button class="ghost" style="width:100%" data-a="add-barber">+ Master qo\'shish</button>';
   }
 
   if (isFull()) {
@@ -889,7 +889,7 @@ function modalHtml() {
   }
   if (m.type === "barber") {
     const opts = (S.adminBranches || []).map(b => '<option value="' + b.id + '"' + (b.id === d.branch_id ? " selected" : "") + ">" + esc(nm(b)) + "</option>").join("");
-    return '<div class="sheet"><div><h2 style="margin-top:0">' + (m.data ? "Ustani o'zgartirish" : "Yangi usta") + "</h2>" +
+    return '<div class="sheet"><div><h2 style="margin-top:0">' + (m.data ? "Masterni o'zgartirish" : "Yangi master") + "</h2>" +
       '<label for="f-name">Ismi</label><input id="f-name" type="text" value="' + esc(d.name || "") + '">' +
       '<label for="f-name-ru">Ismi (ruscha)</label><input id="f-name-ru" type="text" value="' + esc(d.name_ru || "") + '">' +
       (isFull() ? '<label for="f-br">Filial</label><select id="f-br">' + opts + "</select>" : "") + photoField("Rasm", d.photo_url, "photo") + foot + "</div></div>";
@@ -1210,11 +1210,11 @@ const H = {
     catch (e) { toast("Havolani belgilab nusxalang", true); }
   },
   "share-binv": () => {
-    const url = "https://t.me/share/url?url=" + encodeURIComponent(S.set.binv.link) + "&text=" + encodeURIComponent("Usta sifatida ulanish uchun havola");
+    const url = "https://t.me/share/url?url=" + encodeURIComponent(S.set.binv.link) + "&text=" + encodeURIComponent("Master sifatida ulanish uchun havola");
     if (tg && tg.openTelegramLink) tg.openTelegramLink(url); else window.open(url, "_blank");
   },
   "unlink-barber": async d => {
-    if (!(await ask("Ustaning Telegramini uzamizmi? Unga xabar kelmaydi."))) return;
+    if (!(await ask("Masterning Telegramini uzamizmi? Unga xabar kelmaydi."))) return;
     const b = S.adminBarbers.find(x => x.id === Number(d.id));
     try { await api("/api/admin/barbers/" + b.id + "/telegram", {method: "DELETE"}); b.linked = false; toast("Uzildi"); render(); }
     catch (e) { toast(errText(e), true); }
