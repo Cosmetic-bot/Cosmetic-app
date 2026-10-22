@@ -251,7 +251,7 @@ h2{font-family:'Cormorant Garamond',Georgia,serif;font-weight:700;font-size:27px
 
 <script>
 // ====== SOZLAMA: Render'dagi bot serveringiz manzili (oxirida / belgisisiz) ======
-const API_BASE = "https://cosmetic-bot-79an.onrender.com";
+const API_BASE = "https://barber3-bot.onrender.com";
 // ================================================================================
 
 const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
@@ -332,7 +332,7 @@ const tgUser = tg && tg.initDataUnsafe && tg.initDataUnsafe.user;
 const S = {
   me: null, shop: null, branches: [], adminBranches: null, adminBarbers: null, services: null,
   lang: store("lang") || (tgUser && (tgUser.language_code || "").indexOf("ru") === 0 ? "ru" : "uz"),
-  theme: store("theme") || "light",
+  theme: store("theme2") || "light",
   view: "home", step: 1, branch: null, barber: null, picked: [], off: null, cal: null, hourOpen: null, slotInfo: null, phone: "", date: "", slots: null, slot: null, slotReq: 0, done: null,
   mineScope: "active", mine: {active: null, history: null},
   sched: {date: "", branch: 0, barber: 0, list: null},
@@ -1173,7 +1173,7 @@ const H = {
   tab: d => openView(d.t),
   view: d => openView(d.v),
   "go-home": () => openView("home"),
-  theme: () => { S.theme = S.theme === "dark" ? "light" : "dark"; store("theme", S.theme); applyTheme(); render(); },
+  theme: () => { S.theme = S.theme === "dark" ? "light" : "dark"; store("theme2", S.theme); applyTheme(); render(); },
   lang: () => {
     S.lang = S.lang === "uz" ? "ru" : "uz"; store("lang", S.lang); applyTheme(); render();
     api("/api/me/lang", {method: "POST", body: {lang: S.lang}}).catch(() => {});
