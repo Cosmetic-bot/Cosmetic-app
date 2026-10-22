@@ -166,6 +166,14 @@ h2{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:24px;marg
 .done-mark{width:72px;height:72px;border-radius:50%;background:var(--ok-bg);color:var(--ok);display:grid;place-items:center;margin:40px 0 8px}
 .done-mark svg{width:36px;height:36px;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
 .center{padding-top:28vh;text-align:center}
+.svc.has-ph{flex-direction:column;align-items:stretch;gap:10px;padding:10px 10px 14px}
+.svc-ph{display:grid;gap:6px}
+.svc-ph.c2{grid-template-columns:1fr 1fr}
+.svc-ph span{position:relative;display:block}
+.svc-ph img{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:10px;display:block;background:var(--grey-bg)}
+.svc-ph.c1 img{aspect-ratio:16/10}
+.svc-ph i{position:absolute;left:6px;bottom:6px;font-style:normal;font-size:12px;font-weight:600;color:#fff;background:rgba(0,0,0,.55);padding:2px 8px;border-radius:999px}
+.svc-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:0 6px}
 .ba-link{display:inline-flex;align-items:center;gap:6px;margin:-4px 0 12px 2px;padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:var(--card);font-weight:600;font-size:14px;color:var(--blue)}
 .ba-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:6px 0 4px}
 .ba-grid img{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:12px;background:var(--grey-bg);display:block}
@@ -226,7 +234,7 @@ h2{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:24px;marg
 
 <script>
 // ====== SOZLAMA: Render'dagi bot serveringiz manzili (oxirida / belgisisiz) ======
-const API_BASE = "https://cosmetic-bot-79an.onrender.com";
+const API_BASE = "https://barber3-bot.onrender.com";
 // ================================================================================
 
 const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
@@ -250,7 +258,7 @@ const I18N = {
     theme: "Mavzu", sum: "so'm",
     loading: "Yuklanmoqda", wait: "Bir lahza…", waking: "Server uyg'onmoqda", waking_sub: "Birinchi ochilishda bir daqiqagacha kutish mumkin.",
     retry: "Qayta urinish", failed: "Ochilmadi", setup_title: "Sozlash kerak", setup_text: "index.html ichidagi API_BASE ga Render manzilini yozing.",
-    st_pending: "Tasdiq kutilmoqda", st_booked: "Tasdiqlangan", choose_barber: "Masterni tanlang", ba_btn: "Oldin / keyin rasmlari", ba_before: "Oldin", ba_after: "Keyin", from_price: "dan {p}", choose_svc: "Xizmatni tanlang",
+    st_pending: "Tasdiq kutilmoqda", st_booked: "Tasdiqlangan", choose_barber: "Masterni tanlang", ba_btn: "Oldin / keyin rasmlari", ba_all: "Barcha rasmlar ({n})", ba_before: "Oldin", ba_after: "Keyin", from_price: "dan {p}", choose_svc: "Xizmatni tanlang",
     next: "Keyingisi", choose_date: "Sanani tanlang", choose_time: "Vaqtni tanlang", free_n: "{n} ta bo'sh", busy: "band", contact: "Aloqa", your_phone: "Telefon raqamingiz",
     phone_sub: "Master kerak bo'lganda siz bilan bog'lanadi", share_contact: "Kontakt bilan ulashish", book_btn: "Band qilish", barber: "Master", total: "Jami", svc_n: "{n} xizmat",
     pend_title: "Tasdiqlash kutilmoqda", pend_text: "Master tez orada yozuvingizni tasdiqlaydi", close: "Yopish", no_barbers: "Hozircha masterlar yo'q.",
@@ -263,7 +271,7 @@ const I18N = {
     err_server_error: "Server xatosi. Birozdan keyin urinib ko'ring.", err_network: "Server bilan aloqa yo'q.",
   },
   ru: {
-    st_pending: "Ожидает подтверждения", choose_barber: "Выберите мастера", ba_btn: "Фото до / после", ba_before: "До", ba_after: "После", from_price: "от {p}", choose_svc: "Выберите услуги",
+    st_pending: "Ожидает подтверждения", choose_barber: "Выберите мастера", ba_btn: "Фото до / после", ba_all: "Все фото ({n})", ba_before: "До", ba_after: "После", from_price: "от {p}", choose_svc: "Выберите услуги",
     next: "Далее", choose_date: "Выберите дату", choose_time: "Выберите время", free_n: "{n} свободно", busy: "занято", contact: "Контакты", your_phone: "Ваш телефон",
     phone_sub: "Мастер свяжется с вами при необходимости", share_contact: "Поделиться контактом", book_btn: "Записаться", barber: "Мастер", total: "Итого", svc_n: "услуг: {n}",
     pend_title: "Ожидает подтверждения", pend_text: "Мастер скоро подтвердит вашу запись", close: "Закрыть", no_barbers: "Мастеров пока нет.",
@@ -593,10 +601,14 @@ function viewBarbers() {
 
 function viewServices() {
   const L = (S.services || []).filter(x => x.barber_id === S.barber.id);
-  return subHd(nm(S.barber)) + "<h2 style='margin-top:6px'>" + t("choose_svc") + "</h2>" + L.map(s =>
-    '<button class="svc' + (S.picked.includes(s.id) ? " on" : "") + '" data-a="toggle-svc" data-id="' + s.id + '"><span><b>' + esc(nm(s)) +
-    "</b><small>" + t("minutes", {n: s.duration_min}) + "</small></span><em>" + money(s.price) + "</em></button>" +
-    (photosOf(s.id).length ? '<button class="ba-link" data-a="svc-photos" data-id="' + s.id + '">📷 ' + t("ba_btn") + "</button>" : "")).join("");
+  return subHd(nm(S.barber)) + "<h2 style='margin-top:6px'>" + t("choose_svc") + "</h2>" + L.map(s => {
+    const ph = photosOf(s.id), shown = [ph.find(p => p.kind === "before"), ph.find(p => p.kind === "after")].filter(Boolean);
+    const pics = shown.length ? '<span class="svc-ph c' + shown.length + '">' + shown.map(p => '<span><img loading="lazy" alt="" src="' + esc(p.url) + '"><i>' + t(p.kind === "before" ? "ba_before" : "ba_after") + "</i></span>").join("") + "</span>" : "";
+    const info = '<span><b>' + esc(nm(s)) + "</b><small>" + t("minutes", {n: s.duration_min}) + "</small></span><em>" + money(s.price) + "</em>";
+    return '<button class="svc' + (shown.length ? " has-ph" : "") + (S.picked.includes(s.id) ? " on" : "") + '" data-a="toggle-svc" data-id="' + s.id + '">' +
+      (shown.length ? pics + '<span class="svc-row">' + info + "</span>" : info) + "</button>" +
+      (ph.length > shown.length ? '<button class="ba-link" data-a="svc-photos" data-id="' + s.id + '">📷 ' + t("ba_all", {n: ph.length}) + "</button>" : "");
+  }).join("");
 }
 
 function viewCalendar() {
